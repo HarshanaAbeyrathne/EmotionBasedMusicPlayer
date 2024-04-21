@@ -1,11 +1,11 @@
 1. Build EAS
 
-*Android
+#Android
 https://docs.expo.dev/develop/development-builds/create-a-build/
 
 `eas build --profile development --platform android`
 
-*IOS
+#IOS
 https://docs.expo.dev/develop/development-builds/create-a-build/
 
 2. install the application on your device
