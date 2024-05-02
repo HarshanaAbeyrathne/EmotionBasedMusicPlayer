@@ -5,12 +5,13 @@ import TrackPlayer, {Capability} from "react-native-track-player";
 import { useEffect } from "react";
 
 import MusicPlayer from "./component/MusicPlayer";
+import CustomCamera from "./component/CustomCamera";
 
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <MusicPlayer />
+      <CustomCamera/>
       <StatusBar style="auto" />
     </View>
   );
