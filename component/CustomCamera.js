@@ -9,9 +9,12 @@ import { View, Pressable, Text, Image, StyleSheet } from "react-native";
 import CameraPermissions from "./CameraPermissions";
 
 function CustomCamera() {
+  const url = "http://51.20.64.60:5000/predict-emotion";
+
   const { hasPermission, requestPermission } = useCameraPermission();
   const camera = useRef(null); // Using useRef hook to create a ref
   const [currentImage, setCurrentImage] = useState(null);
+  const [emotion, setEmotion] = useState(null);
 
   const device = useCameraDevice("front");
 
@@ -22,10 +25,34 @@ function CustomCamera() {
   console.log("hasPermission:", hasPermission);
 
   const captureImage = async () => {
+    let photo = null;
     if (camera.current) {
-      const photo = await camera.current.takePhoto();
+      photo = await camera.current.takePhoto();
       setCurrentImage(photo.path);
       console.log(photo);
+    }
+
+    const formData = new FormData();
+
+    const uri = "file://" + photo.path;
+
+    formData.append("file", { uri: uri, name: "photo.jpg", type: "image/jpg" });
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+      const data = await response.json();
+      setEmotion(data.emotion);
+
+      // Write Your Code here for redirections and response handling
+      console.log(data);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -46,7 +73,15 @@ function CustomCamera() {
           style={styles.captureButton}
           onPress={() => captureImage()}
         ></Pressable>
-        {currentImage && <Image source={{ uri: 'file://' + currentImage }} style={styles.capturedImage} />}
+        {currentImage && (
+          <Image
+            source={{ uri: "file://" + currentImage }}
+            style={styles.capturedImage}
+          />
+        )}
+        <View style={styles.statusText}>
+          <Text>{emotion}</Text>
+        </View>
       </View>
     </View>
   );
@@ -93,6 +128,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "white",
     backgroundColor: "transparent",
+  },
+  statusText: {
+    position: "absolute",
+    bottom: 0,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+    width: "100%",
+    fontSize: 20,
+    color: "black",
   },
   capturedImage: {
     position: "absolute",
