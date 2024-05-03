@@ -142,6 +142,7 @@ const styles = StyleSheet.create({
   },
   capturedImage: {
     position: "absolute",
+    top: -10,
     right: 20,
     width: 90,
     height: 160,
