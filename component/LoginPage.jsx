@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
   View,
@@ -13,9 +14,12 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const navigation = useNavigation();
+
   const handleLogin = () => {
     // Placeholder function for login functionality
-    Alert.alert('Login', `Email: ${email}\nPassword: ${password}`);
+    //Alert.alert('Login', `Email: ${email}\nPassword: ${password}`);
+    navigation.navigate('Play');
   };
 
   return (

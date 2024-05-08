@@ -5,8 +5,12 @@ import {
 } from "react-native-vision-camera";
 import { useEffect, useRef, useState } from "react";
 import { View, Pressable, Text, Image, StyleSheet } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useContext } from "react";
 
 import CameraPermissions from "./CameraPermissions";
+
+import { MoodContext } from "../context/MoodContext";
 
 function CustomCamera() {
   const url = "http://51.20.64.60:5000/predict-emotion";
@@ -17,6 +21,9 @@ function CustomCamera() {
   const [emotion, setEmotion] = useState(null);
 
   const device = useCameraDevice("front");
+
+  const {mood, setMood} = useContext(MoodContext);
+  const navigate = useNavigation();
 
   useEffect(() => {
     if (!hasPermission) requestPermission();
@@ -49,6 +56,14 @@ function CustomCamera() {
       const data = await response.json();
       setEmotion(data.emotion);
 
+      if (["sad", "angry", "disgust", "fear", "neutral"].includes(data.emotion?.toLowerCase())) {
+        setMood("sad");
+      }else{
+        setMood("happy");
+      }
+
+      navigate.goBack();
+
       // Write Your Code here for redirections and response handling
       console.log(data);
     } catch (error) {
@@ -80,7 +95,7 @@ function CustomCamera() {
           />
         )}
         <View style={styles.statusText}>
-          <Text>{emotion}</Text>
+          <Text>{mood}</Text>
         </View>
       </View>
     </View>

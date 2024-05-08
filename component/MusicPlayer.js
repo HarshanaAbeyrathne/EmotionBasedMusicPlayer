@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useContext } from "react";
 import { StyleSheet, Text, View, SafeAreaView, Dimensions, TouchableOpacity, Image, Animated } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import TrackPlayer, { RepeatMode, State, usePlaybackState, useProgress, Capability } from "react-native-track-player";
+import { useNavigation } from "@react-navigation/native";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Slider from "@react-native-community/slider";
-import songs from "../model/data";
+
+import { MoodContext } from "../context/MoodContext";
 
 const { width, height } = Dimensions.get("window");
+
+import initialSongs from "../model/data";
 
 
 function MusicPlayer() {
@@ -18,6 +22,30 @@ function MusicPlayer() {
   const scrollX = useRef(new Animated.Value(0)).current;
   const [songIndex, setSongIndex] = useState(0);
   const songSlider = useRef(null);
+
+  const [songs, setSongs] = useState([...initialSongs.sad, ...initialSongs.happy]);
+  const {mood, setMood} = useContext(MoodContext);
+
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    addTracks();
+  },[songs]);
+
+  useEffect(() => {
+    console.log("Mood:" ,mood);
+    if (mood === "happy") {
+      setSongs(initialSongs.happy);
+    } else if (mood === "sad") {
+      setSongs(initialSongs.sad);
+    } else {
+      setSongs([...initialSongs.sad, ...initialSongs.happy]);
+    }
+  }, [mood]);
+
+  const resetSongs = () => {
+    setSongs([...initialSongs.sad, ...initialSongs.happy]);
+  }
 
   async function setup() {
     try {
@@ -47,9 +75,8 @@ function MusicPlayer() {
   
   const addTracks = async () => {
 
-    await setup();
-
     try {
+      await TrackPlayer.reset();
       await TrackPlayer.add(songs);
       await TrackPlayer.setRepeatMode(RepeatMode.Queue);
     } catch (e) {
@@ -63,7 +90,13 @@ function MusicPlayer() {
 
   useEffect(() => {
     const initializePlayer = async () => {
-      addTracks();
+      try{
+        await setup();
+        await addTracks();
+      }catch{
+        console.log("error");
+      }
+      
       scrollX.addListener(({ value }) => {
         const index = Math.round(value / width);
         skipTo(index);
@@ -160,17 +193,14 @@ function MusicPlayer() {
 
       <View style={styles.bottomContainer}>
         <View style={styles.bottomButtons}>
-          <TouchableOpacity onPress={() => {}}>
-            <Ionicons name="home-outline" size={30} color="#ffff"></Ionicons>
+          <TouchableOpacity onPress={() => navigation.navigate("Camera")}>
+            <Ionicons name="camera-outline" size={30} color="#ffff"></Ionicons>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={() => resetSongs()}>
+            <Ionicons name="refresh-circle-outline" size={30} color="#ffff"></Ionicons>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("Select")}>
             <Ionicons name="list-circle-outline" size={30} color="#ffff"></Ionicons>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => {}}>
-            <Ionicons name="search-outline" size={30} color="#ffff"></Ionicons>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => {}}>
-            <Ionicons name="ellipsis-horizontal" size={30} color="#ffff"></Ionicons>
           </TouchableOpacity>
         </View>
       </View>
